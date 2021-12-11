@@ -1,0 +1,394 @@
+SLEEP=/bin/sleep
+$SLEEP 1
+--------------------
+AWK
+--------------------
+
+cat /etc/group | 
+awk -v 
+user="$1" 
+'BEGIN
+{ FS=":"} 
+{ if($4 != "") 
+    {split($4, array, ",");
+    for (i in array)
+        { if (user == array[i])
+            {print $1}
+            };
+        }
+}'
+
+--------------------
+find
+--------------------
+$ find [where to start searching from] [expression determines what to find] [-options] [what to find]
+
+--------------------
+getopts and case 
+--------------------
+getopts specifies a list of flags that can be passed into the script. We can iterate over the results we can
+back from this using a while loop. We can then have a case statement that selects which flag we are processing.
+
+
+--------------------
+NETWORK BASED Filesystem
+--------------------
+
+Explain the concept of a network based file system and its basic functioning
+
+A network based file system simulates being a local filesystem by providing
+the standard file based interface to the filesystem (it can be mounted and unmounted, we can read, write and seek, etc).
+However all reads and writes are really network messages being sent
+
+--------------------
+LVM
+--------------------
+
+What is the main advantage of using lvm over more traditional static partitions?
+we can easily add or remove additional data volumes
+
+--------------------
+Data structures
+--------------------
+
+List one attribute defined in the inode data structure and what its purpose is 
+
+An inode is a data structure in UNIX operating systems that contains important information
+pertaining to files within a file system. When a file system is created in UNIX,
+a set amount of inodes is created, as well. Usually, about 1 percent of the total
+file system disk space is allocated to the inode table.
+
+Userid of the owner
+groupid of the owning group
+deviceid of the device the file is on
+file mode of the file
+timestamps (ctime, mtime, atime)
+link count → how many hard links
+
+--------------------
+Secure boot
+--------------------
+
+Secure booting is a way to ensure that only certain operating systems can be booted on given hardware.
+It is implemented via keys so that an operating system that does not match the installed keys would not
+be able to boot. This was controversial in the linux community as it was feared an operating system vendor
+with a relative monopoly may be able to do deals with hardware vendors so that by default their system would
+be the only one to boot on the given hardware.
+
+--------------------
+Groups/Users
+--------------------
+
+sudo useradd foo-user = create user
+sudo passwd foo-user = set password for user
+
+sudo useradd -m username = create user with home directory
+
+
+group add [group-name]
+usermod -aG [group-name] [user-name]
+
+change user owner and group owneer of file foo
+chown foo-owner:foo-group foo
+
+--------------------
+DOCKER
+--------------------
+
+sudo apt-get install man-db
+sudo apt-get install wget git
+wget -O get-docker https://get.docker.com/
+chmod +x get-docker
+./get-docker
+
+sudo chmod 666 /var/run/docker.sock
+
+adding a user to the “docker” group
+this means that the user can start and stop and manage images and containers without
+being root. There is a danger that they could elevate their own root privileges within the
+container to make unauthorised changes in the host system
+
+sudo groupadd docker
+usermod -aG docker $USER
+
+members of the docker group have access to managing docker images without being given unnecessary
+privileges to other parts of the system. 
+
+download the default ubuntu image from dockerhub. I want to have port 56782
+external to the container be redirected to to port 22 inside the container and have an
+interactive bash shell start up.
+docker run -it -p 56782:22 bash
+
+the save command is used on containers to save the specified container to an image and compress it with tar
+whereas the export command will export an image on the current system to specified location
+
+you need to commit a container to a local image first. Then you need to
+push that image. Before you can do that you also need to be logged in
+--------------------
+dd
+--------------------
+dd if=/dev/random of=./blah.dat status=progress bs=4M; sync
+dd is used to do a low level copy of devices and files. The command copies data from /dev/random (a
+random device that generates random data), and writes this random data to blah.dat in the current
+directory. Dd will display a progress indicator and will copy data 4 megabytes at a time. Finally when
+the command is complete, sync is called to flush all buffers to disk.
+
+xzcat image.xz | dd of=/dev/sdc status=progress; sync
+
+decompress a disk image that has been compresses with xz to stdout which is
+then piped into dd to write the bytes to the disk (not partitions, the actual disk).
+Dd will output the progress in terms of bytes written. Finally, sync is called to
+sync up the buffers and ensure no data is lost before the removal of the sd card
+
+--------------------
+/var
+--------------------
+
+The /var directory contains many directories whose contents changes rapidly. It includes log files, mail
+and print spooling, cache directories, etc. We might want to mount parts of this as separate partitions so
+that they do not overflow and take up storage space. For example, a log file might be written to a great
+deal by a failing process and prevent access to /var/www in the short term. If we have /var/log as a
+mountable volume this can prevent this as it can only grow to the size of the volume.
+
+
+--------------------
+/bin
+--------------------
+
+The /bin directory contains executable programs required to get the system up and running. You would
+never mount /bin as a separate volume as it contains the mount command without which we cannot
+mount any volumes.
+
+--------------------
+SSHFS
+--------------------
+
+SSH Filesystem
+allows a user to access a remote file system  over SSH protocol securely
+
+A filesystem built on top of an ssh connection. 
+When a file is opened on an sshfs mount, a network connection is created
+which transparently copies the data from the server over to the client
+
+The key service provided by ssh and scp are public key encryption. This is a reasonably safe form of
+encryption that ensures messages are not interceptible by a third party, due to the encryption services. 
+
+
+--------------------
+RAID 
+--------------------
+
+striping: splits the data across multiple disks in an array of disks, mirroring: makes a full mirrored copy
+of the data, uses an xored partity check to allow reconstruction of the data
+
+RAID 0 is striping which is where consecutive chunks are stored on separate physical devices. This
+results in faster reads.
+RAID 1 is mirroring which is where each disk has an identical copy maintained.
+RAID 4 uses striping and mirroring and an additional parity disk.
+RAID 5 uses distributed parity so we can rebuild a raid array if any single disk fails.
+RAID 10 raid 1 and 0 combined for speed and mirroring
+
+--------------------
+CHMOD permissions
+--------------------
+
+- - - - - - - - - - 
+^ [ u ] [ g ] [ o ]
+|   ^     ^     ^
+|   |     |     |
+|   |     |  Other users
+|   |     |
+|   |  Members of group
+|   |
+| Owner User
+|
+File or Directory
+
+d   = directory
+-   = file
+
+--- = no permissions
+rwx = read write execute permissions
+
+chmod +[r/w/x] = add permission to all sets
+chmod -[r/w/x] = removes permission from all sets
+chmod [u/g/o]=[r/w/x] = set permissions to each set
+
+chmod u=rwx,g=rw,o=r file
+file owner can read write and execute, group members can read and write while others can only read
+
+numerical shorthand
+0 = no permission
+1 = only execute 
+2 = only write
+3 = write and execute
+4 = only read
+5 = read and execute
+6 = read and write
+7 = read write and execute
+
+chmod 744 filename = file owner can read write and execute, all others can only read
+
+--------------------
+APT
+--------------------
+apt search ^python$ - exact search
+apt search --names-only python
+
+--------------------
+Bash Scripting
+--------------------
+#!/bin/sh
+execute this script using the bourne shell.
+
+#!/bin/bash
+execute this script using bash script.
+
+good practice to store the paths to the programs we are going to use in variables at the beginning of our script
+might be multiple copies of a program on our system and we might want to be able to specify which one to run 
+
+as bash scripts are interpreted text they are slower than compiled programs. The only data type in a shell
+script is string which also involves converting to/from strng for each operation which also provides a
+slow-down. 
+
+for vs while loops
+for loops are over a collection of items
+while loops are continued until some condition is met. 
+for loops for collections such as files or paths to iterate over. 
+while loops when there is a clear number of iterations or there 
+is some final condition that the script needs to meet.
+
+a) How do I display a file single spaced regardless of the original spacing (2 marks)?
+    cat -s filename
+b) How do I number the lines of output (2 marks)
+    cat -n filename
+c) How do I display tabs as ^I? (2 marks)
+    cat -T filename
+d) How do I display all non-printing characters? (2 marks)
+    cat -v filename
+
+set -u / bash -u
+
+    #!/bin/bash
+    # create a random string for a filename
+*   filename=$(cat /dev/urandom | tr -dc 'a-zA-Z'| fold -w 30 | head -n 1}
+    # test that the file exists
+    if [[ ! -e “${filename}” ]] ; then
+        # use dd to write zeroes
+*       dd if=/dev/zero of=${filename}.tmp bs=4M count=80; sync
+        #do something with the file
+        #delete the file
+        rm ${filename}.
+    fi
+
+filename=$(mktemp XXXXXX.tmp)
+dd if=/dev/zero of=${filename}.tmp bs=4M count=80; sync
+the key here is the call to mktemp
+
+--------------------
+Common Linux Distros
+--------------------
+1. Debian
+
+2. Gentoo
+    a distro built for professional use and experts who take into 
+    consideration what packages they are working with from the word go. 
+
+3. Ubuntu
+    beginners, intermediate users, and professionals alike.
+
+4. Linux Mint
+    Linux desktop to perform day-to-day desktop tasks,
+    listening to music, watching videos, and even gaming
+
+5. Red Hat Enterprise Linux
+    a Linux distro designed for Enterprise or commercial purposes.
+
+6. CentOS 
+    
+-------------------
+Source based distros linux
+-------------------
+
+Gentoo Linux, Linux From Scratch, ROCK Linux and the Sorcerer group 
+
+-------------------
+Common Unix Shells
+-------------------
+1. Bash Shell
+    Command line editing
+    Job Control
+    Unlimited size command history
+    Shell Functions and Aliases
+    Unlimited size Indexed arrays
+    Integer arithmetic in any base from two to sixty-four
+
+2. Tcsh/Csh Shell
+    C like syntax
+    Command-line editor
+    Programmable word and filename completion
+    Spelling correction
+    Job control
+
+3. Ksh Shell
+    Ksh stands for Korn shell and was designed 
+    and developed by David G. Korn. It is a complete, 
+    powerful, high-level programming language and also an 
+    interactive command language just like many other Unix/GNU Linux shells.
+
+4. Zsh Shell
+    Filename generation
+    Startup files
+    Login/Logout watching
+    Closing comments
+    Concept index
+    Variable index
+    Functions index
+    Key index and many more that you can find out in man pages
+
+5. Fish
+    Man page completions
+    Web based configuration
+    Auto-suggestions
+    Fully scriptable with clean scripts
+    Support for term256 terminal technology
+-------------------
+Processes examples
+-------------------
+
+To see every process on the system using standard syntax:
+          ps -e
+          ps -ef
+          ps -eF
+          ps -ely
+
+       To see every process on the system using BSD syntax:
+          ps ax
+          ps axu
+
+       To print a process tree:
+          ps -ejH
+          ps axjf
+
+       To get info about threads:
+          ps -eLf
+          ps axms
+
+       To get security info:
+          ps -eo euser,ruser,suser,fuser,f,comm,label
+          ps axZ
+          ps -eM
+
+       To see every process running as root (real & effective ID) in user format:
+          ps -U root -u root u
+
+       To see every process with a user-defined format:
+          ps -eo pid,tid,class,rtprio,ni,pri,psr,pcpu,stat,wchan:14,comm
+          ps axo stat,euid,ruid,tty,tpgid,sess,pgrp,ppid,pid,pcpu,comm
+          ps -Ao pid,tt,user,fname,tmout,f,wchan
+
+       Print only the process IDs of syslogd:
+          ps -C syslogd -o pid=
+
+       Print only the name of PID 42:
+          ps -q 42 -o comm=

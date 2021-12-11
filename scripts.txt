@@ -1,0 +1,113 @@
+SCRIPTS
+create file either touch or vim filename
+change permissions chmod +x filename
+shell top of file #!/bin/bash
+watch for spacing in script
+example script
+
+shell----------	#!/bin/bash
+comment--------	# Basic while loop
+variable-------	counter=1
+loop condition- while [[ "$counter" -le "10" ]]
+start loop----- do
+			echo $counter
+			((counter++))
+end loop------- done
+		echo All done
+
+==============================
+-------Test expressions-------
+==============================
+
+test expression
+or
+[ expression ] <- mind the spacing
+
+***File Arguments***
+-e FileName - FileName exists
+
+-b Filename - Returns a True exit value if the specified FileName exists and is a block special file
+-c FileName - FileName is a character special file
+-d FileName - FileName is a directory
+
+-f FileName - FileName is a regular file
+-g FileName - FileName's Set Group ID bit is set
+-h FileName - FileName is a symbolic link
+-k FileName - FileName's sticky bit is set
+-L FileName - FileName is a symbolic link
+-p FileName - FileName is a named pipe (FIFO)
+-r FileName - FileName is readable by the current process
+-s FileName - FileName has a size greater than 0
+-t FileDescriptor - FileDescriptor is open and associated with a terminal
+-u FileName - FileName's Set User ID bit is set
+
+***String arguments***
+-n String1 - the length of the String1 variable is nonzero
+-z String1 - the length of the String1 variable is 0 (zero)
+String1 = String2 - String1 and String2 variables are identical
+String1 != String2 - String1 and String2 variables are not identical
+String1 - true if String1 variable is not a null string
+
+***Number arguments***
+Integer1 -eq Integer2 - Integer1 and Integer2 variables are algebraically equal
+
+-ne - not equal
+-gt - greater than
+-ge - greater or equal 
+-lt - less than
+-le - less or equal
+
+***Operators***
+! - Unary negation operator
+-a - Binary AND operator
+-o - Binary OR operator (the -a operator has higher precedence than the -o operator)
+\(Expression\) - Parentheses for grouping must be escaped with a backslash \
+
+***Exit status***
+0 - The Expression parameter is true
+1 - The Expression parameter is false or missing
+>1 - An error occurred
+
+==============================
+---------Test Examples--------
+==============================
+-To test whether a file is nonexistent or empty:
+
+ if test ! -s "$1"
+ then
+   echo $1 does not exist or is empty.
+ fi
+
+If the file specified by the first positional parameter to the shell procedure, $1, does not exist or is of size 0, the test command displays the message.
+If $1 exists and has a size greater than 0, the test command displays nothing.
+
+Note: There must be a space between the -s function and the file name.
+
+The quotation marks around $1 ensure that the test works properly even if the value of $1 is a null string.
+If the quotation marks are omitted and $1 is the empty string, the test command displays the error message:
+
+	test: argument expected.
+
+-To do a complex comparison:
+
+ if [ "$#" -lt 2 ] || ! [ -e "$1" ]
+ then
+   exit
+ fi
+
+-Check arguments script:
+
+ #!/bin/bash
+ die(){
+	local m="$1"  # the first arg 
+	local e=$2    # the second arg
+	echo "$m" 
+ 	exit $e
+ }
+
+ # if not enough args displayed, display an error and die
+ [ $# -eq 0 ] && die "Usage: $0 filename" 1
+
+ # Rest of script goes here
+ echo "We can start working the script..."
+
